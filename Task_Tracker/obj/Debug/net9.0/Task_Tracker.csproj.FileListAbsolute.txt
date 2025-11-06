@@ -1,0 +1,15 @@
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\bin\Debug\net9.0\Task_Tracker.exe
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\bin\Debug\net9.0\Task_Tracker.deps.json
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\bin\Debug\net9.0\Task_Tracker.runtimeconfig.json
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\bin\Debug\net9.0\Task_Tracker.dll
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\bin\Debug\net9.0\Task_Tracker.pdb
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.AssemblyInfoInputs.cache
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.AssemblyInfo.cs
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.csproj.CoreCompileInputs.cache
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.sourcelink.json
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.dll
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\refint\Task_Tracker.dll
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.pdb
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\Task_Tracker.genruntimeconfig.cache
+C:\Users\hp\Desktop\tasktracker\Task_Tracker\obj\Debug\net9.0\ref\Task_Tracker.dll
