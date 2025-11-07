@@ -3,6 +3,7 @@ using Task_Tracker.Application;
 
 Console.WriteLine("=== TASK TRACKER ===");
 Console.WriteLine("1) Add Task");
+Console.WriteLine("2) Update Task Status");
 Console.WriteLine("0) Exit");
 
 var tasks = SimpleStorage.Load();
@@ -10,7 +11,7 @@ var tasks = SimpleStorage.Load();
 while (true)
 {
     Console.Write("\nChoose: ");
-    var choice = Console.ReadLine();
+    var choice = (Console.ReadLine() ?? "").Trim();
 
     if (choice == "0") break;
 
@@ -18,7 +19,6 @@ while (true)
     {
         var item = new TaskItem();
 
-        // TITLE (required)
         while (true)
         {
             Console.Write("Title (required): ");
@@ -30,15 +30,12 @@ while (true)
             }
             Console.WriteLine("Please enter a title.");
         }
-
         Console.Write("Description: ");
         item.Description = (Console.ReadLine() ?? "").Trim();
-
         while (true)
         {
             Console.Write("Assignee (name or email, required): ");
-            var assignee = Console.ReadLine() ?? "";
-           assignee = assignee.Trim();
+            var assignee = (Console.ReadLine() ?? "").Trim();
             if (!string.IsNullOrWhiteSpace(assignee))
             {
                 item.Assignee = assignee;
@@ -46,7 +43,6 @@ while (true)
             }
             Console.WriteLine("Assignee cannot be empty.");
         }
-
         while (true)
         {
             Console.Write("Due date (yyyy-MM-dd): ");
@@ -58,8 +54,7 @@ while (true)
                 break;
             }
 
-            DateTime date;
-            if (DateTime.TryParse(dueStr, out date))
+            if (DateTime.TryParse(dueStr, out var date))
             {
                 if (date.Date < DateTime.UtcNow.Date)
                 {
@@ -76,11 +71,9 @@ while (true)
                 Console.WriteLine("Please use the format yyyy-MM-dd.");
             }
         }
-
         Console.Write("Priority (Low/Medium/High/Critical): ");
         var priority = (Console.ReadLine() ?? "").Trim();
-        Priority pr;
-        if (!Enum.TryParse<Priority>(priority, true, out pr)) pr = Priority.Medium;
+        if (!Enum.TryParse<Priority>(priority, true, out var pr)) pr = Priority.Medium;
         item.Priority = pr;
 
         item.Status = Status.Todo;
@@ -95,5 +88,73 @@ while (true)
         Console.WriteLine($"Due: {item.DueDate:yyyy-MM-dd}");
         Console.WriteLine($"Priority: {item.Priority}");
         Console.WriteLine($"Status: {item.Status}");
+        continue;
     }
+    if (choice == "2")
+    {
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("No tasks yet. Add one first.");
+            continue;
+        }
+        Console.WriteLine("\nExisting tasks:");
+        for (int i = 0; i < tasks.Count; i++)
+        {
+            var x = tasks[i];
+            Console.WriteLine($"[{i + 1}] {x.Id.Substring(0, 6)} | {x.Title} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
+        }
+
+        Console.WriteLine("- ID (first 6 or full, e.g., 2e104f)");
+        var pick = (Console.ReadLine() ?? "").Trim();
+
+        TaskItem? target = null;
+
+        if (int.TryParse(pick, out var idxNum))
+        {
+            if (idxNum >= 1 && idxNum <= tasks.Count)
+                target = tasks[idxNum - 1];
+        }
+
+        if (target == null)
+        {
+            if (pick.Length <= 6)
+                target = tasks.Find(t => t.Id.StartsWith(pick, StringComparison.OrdinalIgnoreCase));
+            if (target == null)
+                target = tasks.Find(t => string.Equals(t.Id, pick, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (target == null)
+        {
+            target = tasks.Find(t => string.Equals(t.Title, pick, StringComparison.OrdinalIgnoreCase));
+            if (target == null)
+                target = tasks.Find(t => t.Title.IndexOf(pick, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        if (target == null)
+        {
+            Console.WriteLine("Task not found.");
+            continue;
+        }
+
+        Console.WriteLine($"\nSelected: {target.Title} ({target.Id.Substring(0,6)})");
+        Console.WriteLine($"Current status: {target.Status}");
+        Console.WriteLine("New status options: Todo, InProgress, Done");
+
+        Status newStatus;
+        while (true)
+        {
+            Console.Write("Set new status: ");
+            var s = (Console.ReadLine() ?? "").Trim();
+            if (Enum.TryParse<Status>(s, true, out newStatus))
+                break;
+            Console.WriteLine("Invalid status. Use: Todo, InProgress, Done");
+        }
+
+        target.Status = newStatus;
+        SimpleStorage.Save(tasks);
+        Console.WriteLine("Status updated.");
+        continue;
+    }
+
+    Console.WriteLine("Unknown option. Use 0, 1, or 2.");
 }
