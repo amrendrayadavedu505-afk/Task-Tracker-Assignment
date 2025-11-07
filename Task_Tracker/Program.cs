@@ -4,6 +4,7 @@ using Task_Tracker.Application;
 Console.WriteLine("=== TASK TRACKER ===");
 Console.WriteLine("1) Add Task");
 Console.WriteLine("2) Update Task Status");
+Console.WriteLine("3) Search Tasks");
 Console.WriteLine("0) Exit");
 
 var tasks = SimpleStorage.Load();
@@ -14,7 +15,6 @@ while (true)
     var choice = (Console.ReadLine() ?? "").Trim();
 
     if (choice == "0") break;
-
     if (choice == "1")
     {
         var item = new TaskItem();
@@ -22,10 +22,10 @@ while (true)
         while (true)
         {
             Console.Write("Title (required): ");
-            var t = Console.ReadLine() ?? "";
-            if (!string.IsNullOrWhiteSpace(t))
+            var task = Console.ReadLine() ?? "";
+            if (!string.IsNullOrWhiteSpace(task))
             {
-                item.Title = t.Trim();
+                item.Title = task.Trim();
                 break;
             }
             Console.WriteLine("Please enter a title.");
@@ -104,17 +104,16 @@ while (true)
             Console.WriteLine($"[{i + 1}] {x.Id.Substring(0, 6)} | {x.Title} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
         }
 
-        Console.WriteLine("- ID (first 6 or full, e.g., 2e104f)");
+        Console.WriteLine("\nSelect a task by Number, ID (first 6 or full), or Title");
+        Console.Write("Your input: ");
         var pick = (Console.ReadLine() ?? "").Trim();
 
         TaskItem? target = null;
 
         if (int.TryParse(pick, out var idxNum))
         {
-            if (idxNum >= 1 && idxNum <= tasks.Count)
-                target = tasks[idxNum - 1];
+            if (idxNum >= 1 && idxNum <= tasks.Count) target = tasks[idxNum - 1];
         }
-
         if (target == null)
         {
             if (pick.Length <= 6)
@@ -122,7 +121,6 @@ while (true)
             if (target == null)
                 target = tasks.Find(t => string.Equals(t.Id, pick, StringComparison.OrdinalIgnoreCase));
         }
-
         if (target == null)
         {
             target = tasks.Find(t => string.Equals(t.Title, pick, StringComparison.OrdinalIgnoreCase));
@@ -144,9 +142,8 @@ while (true)
         while (true)
         {
             Console.Write("Set new status: ");
-            var s = (Console.ReadLine() ?? "").Trim();
-            if (Enum.TryParse<Status>(s, true, out newStatus))
-                break;
+            var status = (Console.ReadLine() ?? "").Trim();
+            if (Enum.TryParse<Status>(status, true, out newStatus)) break;
             Console.WriteLine("Invalid status. Use: Todo, InProgress, Done");
         }
 
@@ -155,6 +152,62 @@ while (true)
         Console.WriteLine("Status updated.");
         continue;
     }
+    if (choice == "3")
+    {
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("No tasks to search.");
+            continue;
+        }
 
-    Console.WriteLine("Unknown option. Use 0, 1, or 2.");
+        Console.WriteLine("\nSearch by:");
+        Console.WriteLine("1) Title");
+        Console.WriteLine("2) ID prefix");
+        Console.WriteLine("3) Assignee");
+        Console.Write("Pick: ");
+        var sopt = (Console.ReadLine() ?? "").Trim();
+
+        List<TaskItem> found = new List<TaskItem>();
+
+        if (sopt == "1")
+        {
+            Console.Write("Enter title text: ");
+            var title = Console.ReadLine() ?? "";
+            found = SimpleSearch.ByTitle(tasks, title);
+        }
+        else if (sopt == "2")
+        {
+            Console.Write("Enter ID: ");
+            var q = Console.ReadLine() ?? "";
+            found = SimpleSearch.ByIdPrefix(tasks, q);
+        }
+        else if (sopt == "3")
+        {
+            Console.Write("Enter assignee text: ");
+            var assignee = Console.ReadLine() ?? "";
+            found = SimpleSearch.ByAssignee(tasks, assignee);
+        }
+        else
+        {
+            Console.WriteLine("Unknown search option.");
+            continue;
+        }
+
+        if (found.Count == 0)
+        {
+            Console.WriteLine("No results.");
+        }
+        else
+        {
+            Console.WriteLine($"\nFound {found.Count}:");
+            for (int i = 0; i < found.Count; i++)
+            {
+                var x = found[i];
+                Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
+            }
+        }
+        continue;
+    }
+
+    Console.WriteLine("Unknown option. Use 0, 1, 2, or 3.");
 }
