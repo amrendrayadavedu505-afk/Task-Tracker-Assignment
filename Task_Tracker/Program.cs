@@ -15,6 +15,7 @@ while (true)
     var choice = (Console.ReadLine() ?? "").Trim();
 
     if (choice == "0") break;
+
     if (choice == "1")
     {
         var item = new TaskItem();
@@ -22,10 +23,10 @@ while (true)
         while (true)
         {
             Console.Write("Title (required): ");
-            var task = Console.ReadLine() ?? "";
-            if (!string.IsNullOrWhiteSpace(task))
+            var t = Console.ReadLine() ?? "";
+            if (!string.IsNullOrWhiteSpace(t))
             {
-                item.Title = task.Trim();
+                item.Title = t.Trim();
                 break;
             }
             Console.WriteLine("Please enter a title.");
@@ -97,6 +98,8 @@ while (true)
             Console.WriteLine("No tasks yet. Add one first.");
             continue;
         }
+
+        // numbered list
         Console.WriteLine("\nExisting tasks:");
         for (int i = 0; i < tasks.Count; i++)
         {
@@ -109,7 +112,6 @@ while (true)
         var pick = (Console.ReadLine() ?? "").Trim();
 
         TaskItem? target = null;
-
         if (int.TryParse(pick, out var idxNum))
         {
             if (idxNum >= 1 && idxNum <= tasks.Count) target = tasks[idxNum - 1];
@@ -142,8 +144,8 @@ while (true)
         while (true)
         {
             Console.Write("Set new status: ");
-            var status = (Console.ReadLine() ?? "").Trim();
-            if (Enum.TryParse<Status>(status, true, out newStatus)) break;
+            var s = (Console.ReadLine() ?? "").Trim();
+            if (Enum.TryParse<Status>(s, true, out newStatus)) break;
             Console.WriteLine("Invalid status. Use: Todo, InProgress, Done");
         }
 
@@ -161,9 +163,11 @@ while (true)
         }
 
         Console.WriteLine("\nSearch by:");
-        Console.WriteLine("1) Title");
-        Console.WriteLine("2) ID prefix");
-        Console.WriteLine("3) Assignee");
+        Console.WriteLine("1) Title (contains)");
+        Console.WriteLine("2) ID prefix (first 6 or full)");
+        Console.WriteLine("3) Assignee (contains)");
+        Console.WriteLine("4) Due date (On / Before / After)");
+        Console.WriteLine("5) Priority (equals)");
         Console.Write("Pick: ");
         var sopt = (Console.ReadLine() ?? "").Trim();
 
@@ -172,20 +176,50 @@ while (true)
         if (sopt == "1")
         {
             Console.Write("Enter title text: ");
-            var title = Console.ReadLine() ?? "";
-            found = SimpleSearch.ByTitle(tasks, title);
+            var q = Console.ReadLine() ?? "";
+            found = SimpleSearch.ByTitle(tasks, q);
         }
         else if (sopt == "2")
         {
-            Console.Write("Enter ID: ");
+            Console.Write("Enter ID or first 6 chars: ");
             var q = Console.ReadLine() ?? "";
             found = SimpleSearch.ByIdPrefix(tasks, q);
         }
         else if (sopt == "3")
         {
             Console.Write("Enter assignee text: ");
-            var assignee = Console.ReadLine() ?? "";
-            found = SimpleSearch.ByAssignee(tasks, assignee);
+            var q = Console.ReadLine() ?? "";
+            found = SimpleSearch.ByAssignee(tasks, q);
+        }
+        else if (sopt == "4")
+        {
+            Console.WriteLine("1) On date   2) Before date   3) After date");
+            Console.Write("Choose: ");
+            var m = (Console.ReadLine() ?? "").Trim();
+
+            Console.Write("Enter date (yyyy-MM-dd): ");
+            var ds = (Console.ReadLine() ?? "").Trim();
+            if (!DateTime.TryParse(ds, out var dt))
+            {
+                Console.WriteLine("Bad date format.");
+                continue;
+            }
+
+            if (m == "1") found = SimpleSearch.ByDueOn(tasks, dt);
+            else if (m == "2") found = SimpleSearch.ByDueBefore(tasks, dt);
+            else if (m == "3") found = SimpleSearch.ByDueAfter(tasks, dt);
+            else { Console.WriteLine("Unknown option."); continue; }
+        }
+        else if (sopt == "5")
+        {
+            Console.Write("Priority (Low/Medium/High/Critical): ");
+            var ptxt = (Console.ReadLine() ?? "").Trim();
+            if (!Enum.TryParse<Priority>(ptxt, true, out var prio))
+            {
+                Console.WriteLine("Invalid priority.");
+                continue;
+            }
+            found = SimpleSearch.ByPriority(tasks, prio);
         }
         else
         {
@@ -203,7 +237,7 @@ while (true)
             for (int i = 0; i < found.Count; i++)
             {
                 var x = found[i];
-                Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
+                Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Priority} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
             }
         }
         continue;
