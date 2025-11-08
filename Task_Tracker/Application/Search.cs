@@ -16,11 +16,11 @@ namespace Task_Tracker.Application
             text = text.Trim();
             for (int i = 0; i < items.Count; i++)
             {
-                var t = items[i];
-                if (!string.IsNullOrEmpty(t.Title))
+                var title = items[i];
+                if (!string.IsNullOrEmpty(title.Title))
                 {
-                    if (t.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
-                        result.Add(t);
+                    if (title.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
+                        result.Add(title);
                 }
             }
             return result;
