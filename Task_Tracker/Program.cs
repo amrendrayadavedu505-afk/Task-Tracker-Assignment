@@ -16,10 +16,12 @@ while (true)
 
     if (choice == "0") break;
 
+    // ------------------ ADD TASK ------------------
     if (choice == "1")
     {
         var item = new TaskItem();
 
+        // TITLE (required)
         while (true)
         {
             Console.Write("Title (required): ");
@@ -31,8 +33,12 @@ while (true)
             }
             Console.WriteLine("Please enter a title.");
         }
+
+        // DESCRIPTION
         Console.Write("Description: ");
         item.Description = (Console.ReadLine() ?? "").Trim();
+
+        // ASSIGNEE (required)
         while (true)
         {
             Console.Write("Assignee (name or email, required): ");
@@ -44,26 +50,28 @@ while (true)
             }
             Console.WriteLine("Assignee cannot be empty.");
         }
+
+        // START DATE
         while (true)
         {
-            Console.Write("Due date (yyyy-MM-dd): ");
-            var dueStr = Console.ReadLine();
+            Console.Write("Start date (yyyy-MM-dd): ");
+            var ss = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(dueStr))
+            if (string.IsNullOrWhiteSpace(ss))
             {
-                item.DueDate = DateTime.UtcNow.AddDays(7);
+                item.StartDate = DateTime.UtcNow.Date;
                 break;
             }
 
-            if (DateTime.TryParse(dueStr, out var date))
+            if (DateTime.TryParse(ss, out var start))
             {
-                if (date.Date < DateTime.UtcNow.Date)
+                if (start.Date < DateTime.UtcNow.Date)
                 {
-                    Console.WriteLine("Due date cannot be in the past.");
+                    Console.WriteLine("Start date cannot be in the past.");
                 }
                 else
                 {
-                    item.DueDate = date;
+                    item.StartDate = start.Date;
                     break;
                 }
             }
@@ -72,13 +80,47 @@ while (true)
                 Console.WriteLine("Please use the format yyyy-MM-dd.");
             }
         }
+
+        // DUE DATE (blank = start + 7 days)
+        while (true)
+        {
+            Console.Write("Due date (yyyy-MM-dd): ");
+            var ds = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(ds))
+            {
+                item.DueDate = item.StartDate.AddDays(7);
+                break;
+            }
+
+            if (DateTime.TryParse(ds, out var due))
+            {
+                due = due.Date;
+                if (due < item.StartDate)
+                {
+                    Console.WriteLine("Due date cannot be before the start date.");
+                }
+                else
+                {
+                    item.DueDate = due;
+                    break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Please use the format yyyy-MM-dd.");
+            }
+        }
+
+        // PRIORITY (defaults to Medium if invalid)
         Console.Write("Priority (Low/Medium/High/Critical): ");
-        var priority = (Console.ReadLine() ?? "").Trim();
-        if (!Enum.TryParse<Priority>(priority, true, out var pr)) pr = Priority.Medium;
+        var ptxt = (Console.ReadLine() ?? "").Trim();
+        if (!Enum.TryParse<Priority>(ptxt, true, out var pr)) pr = Priority.Medium;
         item.Priority = pr;
 
         item.Status = Status.Todo;
 
+        // save
         tasks.Add(item);
         SimpleStorage.Save(tasks);
 
@@ -86,11 +128,14 @@ while (true)
         Console.WriteLine($"ID: {item.Id}");
         Console.WriteLine($"Title: {item.Title}");
         Console.WriteLine($"Assignee: {item.Assignee}");
-        Console.WriteLine($"Due: {item.DueDate:yyyy-MM-dd}");
+        Console.WriteLine($"Start: {item.StartDate:yyyy-MM-dd}");
+        Console.WriteLine($"Due:   {item.DueDate:yyyy-MM-dd}");
         Console.WriteLine($"Priority: {item.Priority}");
         Console.WriteLine($"Status: {item.Status}");
         continue;
     }
+
+    // ------------------ UPDATE TASK STATUS ------------------
     if (choice == "2")
     {
         if (tasks.Count == 0)
@@ -99,12 +144,11 @@ while (true)
             continue;
         }
 
-        // numbered list
         Console.WriteLine("\nExisting tasks:");
         for (int i = 0; i < tasks.Count; i++)
         {
             var x = tasks[i];
-            Console.WriteLine($"[{i + 1}] {x.Id.Substring(0, 6)} | {x.Title} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
+            Console.WriteLine($"[{i + 1}] {x.Id.Substring(0, 6)} | {x.Title} | {x.Status} | {x.StartDate:yyyy-MM-dd} -> {x.DueDate:yyyy-MM-dd}");
         }
 
         Console.WriteLine("\nSelect a task by Number, ID (first 6 or full), or Title");
@@ -112,10 +156,10 @@ while (true)
         var pick = (Console.ReadLine() ?? "").Trim();
 
         TaskItem? target = null;
+
         if (int.TryParse(pick, out var idxNum))
-        {
             if (idxNum >= 1 && idxNum <= tasks.Count) target = tasks[idxNum - 1];
-        }
+
         if (target == null)
         {
             if (pick.Length <= 6)
@@ -123,6 +167,7 @@ while (true)
             if (target == null)
                 target = tasks.Find(t => string.Equals(t.Id, pick, StringComparison.OrdinalIgnoreCase));
         }
+
         if (target == null)
         {
             target = tasks.Find(t => string.Equals(t.Title, pick, StringComparison.OrdinalIgnoreCase));
@@ -154,6 +199,8 @@ while (true)
         Console.WriteLine("Status updated.");
         continue;
     }
+
+    // ------------------ SEARCH TASKS ------------------
     if (choice == "3")
     {
         if (tasks.Count == 0)
@@ -237,7 +284,7 @@ while (true)
             for (int i = 0; i < found.Count; i++)
             {
                 var x = found[i];
-                Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Priority} | {x.Status} | {x.DueDate:yyyy-MM-dd}");
+                Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Priority} | {x.Status} | {x.StartDate:yyyy-MM-dd} -> {x.DueDate:yyyy-MM-dd}");
             }
         }
         continue;
