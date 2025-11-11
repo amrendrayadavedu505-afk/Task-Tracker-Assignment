@@ -94,6 +94,21 @@ namespace Task_Tracker.Application
             }
             return result;
         }
+        public static List<TaskItem> Overdue(List<TaskItem> items)
+{
+    var result = new List<TaskItem>();
+    var today = DateTime.UtcNow.Date;
+
+    for (int i = 0; i < items.Count; i++)
+    {
+        var t = items[i];
+        if (t.DueDate.Date < today && t.Status != Status.Done)
+        {
+            result.Add(t);
+        }
+    }
+    return result;
+}
         public static List<TaskItem> ByPriority(List<TaskItem> items, Priority priority)
         {
             var result = new List<TaskItem>();

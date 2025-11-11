@@ -1,0 +1,7 @@
+[2025-11-10 10:58:05] INFO: App started. Loaded tasks: 7
+[2025-11-10 10:58:53] INFO: Task added: qwkdweu (32c0c3) assignee=hhfewsekf start=2025-11-10 due=2025-11-11 prio=High
+[2025-11-10 11:45:17] INFO: App started. Loaded tasks: 8
+[2025-11-10 11:45:22] INFO: Listed tasks sorted by priority. count=8
+[2025-11-10 11:45:29] INFO: Listed tasks sorted by priority. count=8
+[2025-11-10 11:45:30] INFO: Listed tasks sorted by due date. count=8
+[2025-11-11 04:56:14] INFO: App started. Loaded tasks: 8

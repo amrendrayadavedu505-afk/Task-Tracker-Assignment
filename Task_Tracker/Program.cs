@@ -5,138 +5,158 @@ Console.WriteLine("=== TASK TRACKER ===");
 Console.WriteLine("1) Add Task");
 Console.WriteLine("2) Update Task Status");
 Console.WriteLine("3) Search Tasks");
+Console.WriteLine("4) Show Overdue Tasks");
+Console.WriteLine("5) Export Overdue to CSV");
+Console.WriteLine("6) List Tasks (sorted by Due Date)");   // added
+Console.WriteLine("7) List Tasks (sorted by Priority)");   // added
 Console.WriteLine("0) Exit");
 
 var tasks = SimpleStorage.Load();
+SimpleLog.Info("App started. Loaded tasks: " + tasks.Count);
 
 while (true)
 {
     Console.Write("\nChoose: ");
-    var choice = (Console.ReadLine() ?? "").Trim();
+    var menuChoice = (Console.ReadLine() ?? "").Trim();
 
-    if (choice == "0") break;
+    if (menuChoice == "0")
+    {
+        SimpleLog.Info("App closed by user.");
+        break;
+    }
 
     // ------------------ ADD TASK ------------------
-    if (choice == "1")
+    if (menuChoice == "1")
     {
-        var item = new TaskItem();
-
-        // TITLE (required)
-        while (true)
+        try
         {
-            Console.Write("Title (required): ");
-            var t = Console.ReadLine() ?? "";
-            if (!string.IsNullOrWhiteSpace(t))
+            var item = new TaskItem();
+
+            // TITLE (required)
+            while (true)
             {
-                item.Title = t.Trim();
-                break;
-            }
-            Console.WriteLine("Please enter a title.");
-        }
-
-        // DESCRIPTION
-        Console.Write("Description: ");
-        item.Description = (Console.ReadLine() ?? "").Trim();
-
-        // ASSIGNEE (required)
-        while (true)
-        {
-            Console.Write("Assignee (name or email, required): ");
-            var assignee = (Console.ReadLine() ?? "").Trim();
-            if (!string.IsNullOrWhiteSpace(assignee))
-            {
-                item.Assignee = assignee;
-                break;
-            }
-            Console.WriteLine("Assignee cannot be empty.");
-        }
-
-        // START DATE
-        while (true)
-        {
-            Console.Write("Start date (yyyy-MM-dd): ");
-            var ss = Console.ReadLine();
-
-            if (string.IsNullOrWhiteSpace(ss))
-            {
-                item.StartDate = DateTime.UtcNow.Date;
-                break;
-            }
-
-            if (DateTime.TryParse(ss, out var start))
-            {
-                if (start.Date < DateTime.UtcNow.Date)
+                Console.Write("Title (required): ");
+                var titleInput = Console.ReadLine() ?? "";
+                if (!string.IsNullOrWhiteSpace(titleInput))
                 {
-                    Console.WriteLine("Start date cannot be in the past.");
+                    item.Title = titleInput.Trim();
+                    break;
+                }
+                Console.WriteLine("Please enter a title.");
+            }
+
+            // DESCRIPTION
+            Console.Write("Description: ");
+            item.Description = (Console.ReadLine() ?? "").Trim();
+
+            // ASSIGNEE (required)
+            while (true)
+            {
+                Console.Write("Assignee (name or email, required): ");
+                var assigneeInput = (Console.ReadLine() ?? "").Trim();
+                if (!string.IsNullOrWhiteSpace(assigneeInput))
+                {
+                    item.Assignee = assigneeInput;
+                    break;
+                }
+                Console.WriteLine("Assignee cannot be empty.");
+            }
+
+            // START DATE (blank = today; cannot be in the past)
+            while (true)
+            {
+                Console.Write("Start date (yyyy-MM-dd): ");
+                var startInput = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(startInput))
+                {
+                    item.StartDate = DateTime.UtcNow.Date;
+                    break;
+                }
+
+                if (DateTime.TryParse(startInput, out var startDate))
+                {
+                    startDate = startDate.Date;
+                    if (startDate < DateTime.UtcNow.Date)
+                    {
+                        Console.WriteLine("Start date cannot be in the past.");
+                    }
+                    else
+                    {
+                        item.StartDate = startDate;
+                        break;
+                    }
                 }
                 else
                 {
-                    item.StartDate = start.Date;
-                    break;
+                    Console.WriteLine("Please use the format yyyy-MM-dd.");
                 }
             }
-            else
-            {
-                Console.WriteLine("Please use the format yyyy-MM-dd.");
-            }
-        }
 
-        // DUE DATE (blank = start + 7 days)
-        while (true)
-        {
-            Console.Write("Due date (yyyy-MM-dd): ");
-            var ds = Console.ReadLine();
-
-            if (string.IsNullOrWhiteSpace(ds))
+            // DUE DATE (blank = start + 7 days; must be >= start)
+            while (true)
             {
-                item.DueDate = item.StartDate.AddDays(7);
-                break;
-            }
+                Console.Write("Due date (yyyy-MM-dd): ");
+                var dueInput = Console.ReadLine();
 
-            if (DateTime.TryParse(ds, out var due))
-            {
-                due = due.Date;
-                if (due < item.StartDate)
+                if (string.IsNullOrWhiteSpace(dueInput))
                 {
-                    Console.WriteLine("Due date cannot be before the start date.");
+                    item.DueDate = item.StartDate.AddDays(7);
+                    break;
+                }
+
+                if (DateTime.TryParse(dueInput, out var dueDate))
+                {
+                    dueDate = dueDate.Date;
+                    if (dueDate < item.StartDate)
+                    {
+                        Console.WriteLine("Due date cannot be before the start date.");
+                    }
+                    else
+                    {
+                        item.DueDate = dueDate;
+                        break;
+                    }
                 }
                 else
                 {
-                    item.DueDate = due;
-                    break;
+                    Console.WriteLine("Please use the format yyyy-MM-dd.");
                 }
             }
-            else
-            {
-                Console.WriteLine("Please use the format yyyy-MM-dd.");
-            }
+
+            // PRIORITY (defaults to Medium if invalid)
+            Console.Write("Priority (Low/Medium/High/Critical): ");
+            var priorityInput = (Console.ReadLine() ?? "").Trim();
+            if (!Enum.TryParse<Priority>(priorityInput, true, out var parsedPriority)) parsedPriority = Priority.Medium;
+            item.Priority = parsedPriority;
+
+            item.Status = Status.Todo;
+
+            // save
+            tasks.Add(item);
+            SimpleStorage.Save(tasks);
+
+            Console.WriteLine("\nSaved");
+            Console.WriteLine($"ID: {item.Id}");
+            Console.WriteLine($"Title: {item.Title}");
+            Console.WriteLine($"Assignee: {item.Assignee}");
+            Console.WriteLine($"Start: {item.StartDate:yyyy-MM-dd}");
+            Console.WriteLine($"Due:   {item.DueDate:yyyy-MM-dd}");
+            Console.WriteLine($"Priority: {item.Priority}");
+            Console.WriteLine($"Status: {item.Status}");
+
+            SimpleLog.Info($"Task added: {item.Title} ({item.Id.Substring(0,6)}) assignee={item.Assignee} start={item.StartDate:yyyy-MM-dd} due={item.DueDate:yyyy-MM-dd} prio={item.Priority}");
         }
-
-        // PRIORITY (defaults to Medium if invalid)
-        Console.Write("Priority (Low/Medium/High/Critical): ");
-        var ptxt = (Console.ReadLine() ?? "").Trim();
-        if (!Enum.TryParse<Priority>(ptxt, true, out var pr)) pr = Priority.Medium;
-        item.Priority = pr;
-
-        item.Status = Status.Todo;
-
-        // save
-        tasks.Add(item);
-        SimpleStorage.Save(tasks);
-
-        Console.WriteLine("\nSaved");
-        Console.WriteLine($"ID: {item.Id}");
-        Console.WriteLine($"Title: {item.Title}");
-        Console.WriteLine($"Assignee: {item.Assignee}");
-        Console.WriteLine($"Start: {item.StartDate:yyyy-MM-dd}");
-        Console.WriteLine($"Due:   {item.DueDate:yyyy-MM-dd}");
-        Console.WriteLine($"Priority: {item.Priority}");
-        Console.WriteLine($"Status: {item.Status}");
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to add task.");
+            SimpleLog.Error("Add Task failed: " + ex.Message);
+        }
         continue;
     }
 
     // ------------------ UPDATE TASK STATUS ------------------
-    if (choice == "2")
+    if (menuChoice == "2")
     {
         if (tasks.Count == 0)
         {
@@ -153,31 +173,35 @@ while (true)
 
         Console.WriteLine("\nSelect a task by Number, ID (first 6 or full), or Title");
         Console.Write("Your input: ");
-        var pick = (Console.ReadLine() ?? "").Trim();
+        var pickInput = (Console.ReadLine() ?? "").Trim();
 
         TaskItem? target = null;
 
-        if (int.TryParse(pick, out var idxNum))
-            if (idxNum >= 1 && idxNum <= tasks.Count) target = tasks[idxNum - 1];
+        // number
+        if (int.TryParse(pickInput, out var indexNumber))
+            if (indexNumber >= 1 && indexNumber <= tasks.Count) target = tasks[indexNumber - 1];
 
+        // id
         if (target == null)
         {
-            if (pick.Length <= 6)
-                target = tasks.Find(t => t.Id.StartsWith(pick, StringComparison.OrdinalIgnoreCase));
+            if (pickInput.Length <= 6)
+                target = tasks.Find(t => t.Id.StartsWith(pickInput, StringComparison.OrdinalIgnoreCase));
             if (target == null)
-                target = tasks.Find(t => string.Equals(t.Id, pick, StringComparison.OrdinalIgnoreCase));
+                target = tasks.Find(t => string.Equals(t.Id, pickInput, StringComparison.OrdinalIgnoreCase));
         }
 
+        // title
         if (target == null)
         {
-            target = tasks.Find(t => string.Equals(t.Title, pick, StringComparison.OrdinalIgnoreCase));
+            target = tasks.Find(t => string.Equals(t.Title, pickInput, StringComparison.OrdinalIgnoreCase));
             if (target == null)
-                target = tasks.Find(t => t.Title.IndexOf(pick, StringComparison.OrdinalIgnoreCase) >= 0);
+                target = tasks.Find(t => t.Title.IndexOf(pickInput, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         if (target == null)
         {
             Console.WriteLine("Task not found.");
+            SimpleLog.Info("Update status: task not found for input '" + pickInput + "'");
             continue;
         }
 
@@ -189,19 +213,23 @@ while (true)
         while (true)
         {
             Console.Write("Set new status: ");
-            var s = (Console.ReadLine() ?? "").Trim();
-            if (Enum.TryParse<Status>(s, true, out newStatus)) break;
+            var statusInput = (Console.ReadLine() ?? "").Trim();
+            if (Enum.TryParse<Status>(statusInput, true, out newStatus))
+                break;
             Console.WriteLine("Invalid status. Use: Todo, InProgress, Done");
         }
 
+        var old = target.Status;
         target.Status = newStatus;
         SimpleStorage.Save(tasks);
+
         Console.WriteLine("Status updated.");
+        SimpleLog.Info($"Status change: {target.Title} ({target.Id.Substring(0,6)}) {old} -> {newStatus}");
         continue;
     }
 
     // ------------------ SEARCH TASKS ------------------
-    if (choice == "3")
+    if (menuChoice == "3")
     {
         if (tasks.Count == 0)
         {
@@ -216,79 +244,182 @@ while (true)
         Console.WriteLine("4) Due date (On / Before / After)");
         Console.WriteLine("5) Priority (equals)");
         Console.Write("Pick: ");
-        var sopt = (Console.ReadLine() ?? "").Trim();
+        var searchChoice = (Console.ReadLine() ?? "").Trim();
 
-        List<TaskItem> found = new List<TaskItem>();
+        try
+        {
+            SimpleLog.Info("Search started: option=" + searchChoice);
+            List<TaskItem> found = new List<TaskItem>();
 
-        if (sopt == "1")
-        {
-            Console.Write("Enter title text: ");
-            var q = Console.ReadLine() ?? "";
-            found = SimpleSearch.ByTitle(tasks, q);
-        }
-        else if (sopt == "2")
-        {
-            Console.Write("Enter ID or first 6 chars: ");
-            var q = Console.ReadLine() ?? "";
-            found = SimpleSearch.ByIdPrefix(tasks, q);
-        }
-        else if (sopt == "3")
-        {
-            Console.Write("Enter assignee text: ");
-            var q = Console.ReadLine() ?? "";
-            found = SimpleSearch.ByAssignee(tasks, q);
-        }
-        else if (sopt == "4")
-        {
-            Console.WriteLine("1) On date   2) Before date   3) After date");
-            Console.Write("Choose: ");
-            var m = (Console.ReadLine() ?? "").Trim();
-
-            Console.Write("Enter date (yyyy-MM-dd): ");
-            var ds = (Console.ReadLine() ?? "").Trim();
-            if (!DateTime.TryParse(ds, out var dt))
+            if (searchChoice == "1")
             {
-                Console.WriteLine("Bad date format.");
+                Console.Write("Enter title text: ");
+                var query = Console.ReadLine() ?? "";
+                found = SimpleSearch.ByTitle(tasks, query);
+            }
+            else if (searchChoice == "2")
+            {
+                Console.Write("Enter ID or first 6 chars: ");
+                var idQuery = Console.ReadLine() ?? "";
+                found = SimpleSearch.ByIdPrefix(tasks, idQuery);
+            }
+            else if (searchChoice == "3")
+            {
+                Console.Write("Enter assignee text: ");
+                var whoQuery = Console.ReadLine() ?? "";
+                found = SimpleSearch.ByAssignee(tasks, whoQuery);
+            }
+            else if (searchChoice == "4")
+            {
+                Console.WriteLine("1) On date   2) Before date   3) After date");
+                Console.Write("Choose: ");
+                var whenChoice = (Console.ReadLine() ?? "").Trim();
+
+                Console.Write("Enter date (yyyy-MM-dd): ");
+                var dateText = (Console.ReadLine() ?? "").Trim();
+                if (!DateTime.TryParse(dateText, out var dateQuery))
+                {
+                    Console.WriteLine("Bad date format.");
+                    SimpleLog.Error("Search date parse failed: '" + dateText + "'");
+                    continue;
+                }
+
+                if (whenChoice == "1") found = SimpleSearch.ByDueOn(tasks, dateQuery);
+                else if (whenChoice == "2") found = SimpleSearch.ByDueBefore(tasks, dateQuery);
+                else if (whenChoice == "3") found = SimpleSearch.ByDueAfter(tasks, dateQuery);
+                else { Console.WriteLine("Unknown option."); continue; }
+            }
+            else if (searchChoice == "5")
+            {
+                Console.Write("Priority (Low/Medium/High/Critical): ");
+                var prioText = (Console.ReadLine() ?? "").Trim();
+                if (!Enum.TryParse<Priority>(prioText, true, out var prioEnum))
+                {
+                    Console.WriteLine("Invalid priority.");
+                    SimpleLog.Error("Search priority parse failed: '" + prioText + "'");
+                    continue;
+                }
+                found = SimpleSearch.ByPriority(tasks, prioEnum);
+            }
+            else
+            {
+                Console.WriteLine("Unknown search option.");
                 continue;
             }
 
-            if (m == "1") found = SimpleSearch.ByDueOn(tasks, dt);
-            else if (m == "2") found = SimpleSearch.ByDueBefore(tasks, dt);
-            else if (m == "3") found = SimpleSearch.ByDueAfter(tasks, dt);
-            else { Console.WriteLine("Unknown option."); continue; }
-        }
-        else if (sopt == "5")
-        {
-            Console.Write("Priority (Low/Medium/High/Critical): ");
-            var ptxt = (Console.ReadLine() ?? "").Trim();
-            if (!Enum.TryParse<Priority>(ptxt, true, out var prio))
-            {
-                Console.WriteLine("Invalid priority.");
-                continue;
-            }
-            found = SimpleSearch.ByPriority(tasks, prio);
-        }
-        else
-        {
-            Console.WriteLine("Unknown search option.");
-            continue;
-        }
-
-        if (found.Count == 0)
-        {
-            Console.WriteLine("No results.");
-        }
-        else
-        {
-            Console.WriteLine($"\nFound {found.Count}:");
+            Console.WriteLine(found.Count == 0 ? "No results." : $"\nFound {found.Count}:");
             for (int i = 0; i < found.Count; i++)
             {
                 var x = found[i];
                 Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Priority} | {x.Status} | {x.StartDate:yyyy-MM-dd} -> {x.DueDate:yyyy-MM-dd}");
             }
+
+            SimpleLog.Info("Search finished. results=" + found.Count);
+        }
+        catch (Exception ex)
+        {
+            SimpleLog.Error("Search failed: " + ex.Message);
         }
         continue;
     }
 
-    Console.WriteLine("Unknown option. Use 0, 1, 2, or 3.");
+    // ------------------ SHOW OVERDUE TASKS ------------------
+    if (menuChoice == "4")
+    {
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("No tasks yet.");
+            continue;
+        }
+
+        var overdue = SimpleSearch.Overdue(tasks);
+        if (overdue.Count == 0)
+        {
+            Console.WriteLine("No overdue tasks.");
+            SimpleLog.Info("Overdue viewed: none");
+            continue;
+        }
+
+        Console.WriteLine("\nOverdue tasks:");
+        for (int i = 0; i < overdue.Count; i++)
+        {
+            var x = overdue[i];
+            Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Status} | Due {x.DueDate:yyyy-MM-dd}");
+        }
+        SimpleLog.Info("Overdue viewed: count=" + overdue.Count);
+        continue;
+    }
+
+    // ------------------ EXPORT OVERDUE TO CSV ------------------
+    if (menuChoice == "5")
+    {
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("No tasks yet.");
+            continue;
+        }
+
+        var overdue = SimpleSearch.Overdue(tasks);
+        if (overdue.Count == 0)
+        {
+            Console.WriteLine("No overdue tasks to export.");
+            SimpleLog.Info("Export skipped: no overdue tasks.");
+            continue;
+        }
+
+        try
+        {
+            var path = CsvExport.OverdueToCsv(overdue);
+            Console.WriteLine($"Exported to: {path}");
+            SimpleLog.Info("Exported overdue CSV: " + path);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Export failed.");
+            SimpleLog.Error("Export failed: " + ex.Message);
+        }
+        continue;
+    }
+
+    // ------------------ LIST (sorted by Due Date) ------------------
+    if (menuChoice == "6")
+    {
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("No tasks to list.");
+            continue;
+        }
+
+        var sorted = SimpleSort.ByDueDateAscending(tasks);
+        Console.WriteLine("\nTasks (earliest due first):");
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var x = sorted[i];
+            Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Priority} | {x.Status} | {x.StartDate:yyyy-MM-dd} -> {x.DueDate:yyyy-MM-dd}");
+        }
+        SimpleLog.Info("Listed tasks sorted by due date. count=" + sorted.Count);
+        continue;
+    }
+
+    // ------------------ LIST (sorted by Priority) ------------------
+    if (menuChoice == "7")
+    {
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("No tasks to list.");
+            continue;
+        }
+
+        var sorted = SimpleSort.ByPriorityDesc(tasks);
+        Console.WriteLine("\nTasks (highest priority first):");
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var x = sorted[i];
+            Console.WriteLine($"{x.Id.Substring(0,6)} | {x.Title} | {x.Assignee} | {x.Priority} | {x.Status} | {x.StartDate:yyyy-MM-dd} -> {x.DueDate:yyyy-MM-dd}");
+        }
+        SimpleLog.Info("Listed tasks sorted by priority. count=" + sorted.Count);
+        continue;
+    }
+
+    Console.WriteLine("Unknown option. Use 0, 1, 2, 3, 4, 5, 6, or 7.");
 }
