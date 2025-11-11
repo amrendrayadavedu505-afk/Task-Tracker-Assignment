@@ -5,8 +5,8 @@ using Task_Tracker.Domain;
 namespace Task_Tracker.Application
 {
     // two basic sorts:
-    // 1) insertion sort by due date (earliest first)
-    // 2) selection sort by priority (Critical -> High -> Medium -> Low)
+    // 1) insertion sort by due date
+    // 2) selection sort by priority
     public static class SimpleSort
     {
         public static List<TaskItem> ByDueDateAscending(List<TaskItem> items)
@@ -61,7 +61,9 @@ namespace Task_Tracker.Application
             if (p == Priority.Critical) return 4;
             if (p == Priority.High)     return 3;
             if (p == Priority.Medium)   return 2;
-            return 1; // Low
+            return 1; 
         }
     }
 }
+
+

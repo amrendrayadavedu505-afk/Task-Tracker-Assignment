@@ -5,3 +5,4 @@
 [2025-11-10 11:45:29] INFO: Listed tasks sorted by priority. count=8
 [2025-11-10 11:45:30] INFO: Listed tasks sorted by due date. count=8
 [2025-11-11 04:56:14] INFO: App started. Loaded tasks: 8
+[2025-11-11 06:55:25] INFO: App started. Loaded tasks: 8
