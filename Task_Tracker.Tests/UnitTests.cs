@@ -20,7 +20,6 @@ public class BasicTests
         };
     }
 
-    [Fact] // 1) ByTitle finds substring case-insensitive
     public void Search_ByTitle_FindsSubstring()
     {
         var list = new List<TaskItem>
@@ -34,16 +33,15 @@ public class BasicTests
         Assert.Equal(2, found.Count);
     }
 
-    [Fact] // 2) Overdue = DueDate < today and not Done
     public void Search_Overdue_CorrectFilter()
     {
         var today = DateTime.UtcNow.Date;
 
         var list = new List<TaskItem>
         {
-            Make("past not done", today.AddDays(-10), today.AddDays(-1), Priority.Low, Status.Todo),      // overdue
-            Make("past done",    today.AddDays(-9),  today.AddDays(-2), Priority.Low, Status.Done),      // not overdue
-            Make("future",       today,              today.AddDays(2),  Priority.High, Status.Todo),     // not overdue
+            Make("past not done", today.AddDays(-10), today.AddDays(-1), Priority.Low, Status.Todo), 
+            Make("past done",    today.AddDays(-9),  today.AddDays(-2), Priority.Low, Status.Done),    
+            Make("future",       today,              today.AddDays(2),  Priority.High, Status.Todo),     
         };
 
         var od = SimpleSearch.Overdue(list);
@@ -51,7 +49,7 @@ public class BasicTests
         Assert.Equal("past not done", od[0].Title);
     }
 
-    [Fact] // 3) Sort by due date (insertion sort) should be earliest -> latest
+
     public void Sort_ByDueDateAscending_Works()
     {
         var today = DateTime.UtcNow.Date;
@@ -65,8 +63,6 @@ public class BasicTests
         var sorted = SimpleSort.ByDueDateAscending(list);
         Assert.Equal(new[] { "a", "c", "b" }, new[] { sorted[0].Title, sorted[1].Title, sorted[2].Title });
     }
-
-    [Fact] // 4) Sort by priority (selection sort) Critical -> Low
     public void Sort_ByPriorityDesc_Works()
     {
         var list = new List<TaskItem>
@@ -81,8 +77,6 @@ public class BasicTests
         Assert.Equal(new[] { "crit", "high", "med", "low" },
                      new[] { sorted[0].Title, sorted[1].Title, sorted[2].Title, sorted[3].Title });
     }
-
-    [Fact] // 5) CSV export creates a file and has header + row count
     public void Csv_OverdueToCsv_CreatesFile()
     {
         // Arrange: make one overdue and one not overdue
@@ -92,10 +86,8 @@ public class BasicTests
             Make("od1", today.AddDays(-5), today.AddDays(-1), Priority.Medium),
         };
 
-        // Act
         var path = CsvExport.OverdueToCsv(overdue);
-
-        // Assert
+        
         Assert.True(File.Exists(path));
 
         var text = File.ReadAllText(path);
