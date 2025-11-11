@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj": {}
+    "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj": {}
   },
   "projects": {
-    "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj": {
+    "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj",
+        "projectUniqueName": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj",
         "projectName": "Task_Tracker.Tests",
-        "projectPath": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj",
+        "projectPath": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj",
         "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\obj\\",
+        "outputPath": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -26,8 +26,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj": {
-                "projectPath": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj"
+              "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj": {
+                "projectPath": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj"
               }
             }
           }
@@ -89,14 +89,14 @@
         }
       }
     },
-    "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj": {
+    "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj",
+        "projectUniqueName": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj",
         "projectName": "Task_Tracker",
-        "projectPath": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj",
+        "projectPath": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\Task_Tracker.csproj",
         "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\obj\\",
+        "outputPath": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config"

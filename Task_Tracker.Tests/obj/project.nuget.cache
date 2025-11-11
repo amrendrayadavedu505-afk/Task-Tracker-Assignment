@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Ym3nCQnZyrg=",
+  "dgSpecHash": "gkYANyHLD9M=",
   "success": true,
-  "projectFilePath": "c:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj",
+  "projectFilePath": "C:\\Users\\hp\\Desktop\\tasktracker\\Task_Tracker.Tests\\Task_Tracker.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hp\\.nuget\\packages\\coverlet.collector\\6.0.4\\coverlet.collector.6.0.4.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.codecoverage\\18.0.0\\microsoft.codecoverage.18.0.0.nupkg.sha512",
