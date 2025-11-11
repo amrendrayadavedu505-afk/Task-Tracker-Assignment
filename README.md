@@ -4,6 +4,7 @@ The aim is to learn file handling, searching, sorting, logging, and unit testing
 Each task has a title, description, assignee, start date, due date, priority, and status.All tasks are saved in a JSON file so the data stays after closing the app.
 
  Features
+ 
 Create Task: Add a new task with title, description, due date, priority, and assignee.
 
 Search Tasks: Find tasks quickly by typing part of the name or a full task ID.
